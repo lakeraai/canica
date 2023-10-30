@@ -1,0 +1,13 @@
+node_modules
+.venv
+venv
+dist
+data
+
+# Python
+__pycache__
+.ipynb_checkpoints
+
+src/canica/static
+
+.DS_Store

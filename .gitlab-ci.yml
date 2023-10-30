@@ -1,0 +1,20 @@
+stages:
+  - test
+  # needed for GitLab ECS template (not actively used)
+  - review
+  - production
+  - cleanup
+
+workflow:
+  rules:
+    # On merge requests
+    - if: '$CI_PIPELINE_SOURCE == "merge_request_event"'
+    # On master/main branch
+    - if: "$CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH"
+
+variables:
+  AUTO_DEVOPS_PLATFORM_TARGET: ECS
+  REVIEW_DISABLED: 1
+
+include:
+  - local: .gitlab/ci/test.yml

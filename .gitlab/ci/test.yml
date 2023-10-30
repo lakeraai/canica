@@ -1,0 +1,61 @@
+test:mypy:
+  image: python:3.11
+  stage: test
+  before_script:
+    - pip install poetry
+    - scripts/try_n_times.sh 2 poetry install --with=dev
+  script:
+    # poetry installs packages into virtualenv that we can use with `poetry run`
+    - poetry run mypy src/
+  needs: []
+  rules:
+    - changes:
+        - src/**/*
+
+test:pytest:
+  image: python:3.11
+  stage: test
+  script:
+    - pip install poetry
+    - scripts/try_n_times.sh 2 poetry install --with=dev
+    - poetry run pytest
+  needs: []
+  rules:
+    - changes:
+      - src/**/*
+
+test:precommit:
+  image: python:3.11
+  stage: test
+  before_script:
+    - pip install poetry
+    - scripts/try_n_times.sh 2 poetry install --with=dev
+  script:
+    # poetry installs packages into virtualenv that we can use with `poetry run`
+    - poetry run pre-commit install --hook-type pre-commit
+    - SKIP=prettier poetry run pre-commit run --hook-stage commit --all-files
+    - SKIP=npm-run-build poetry run pre-commit run --hook-stage push --all-files
+  needs: []
+
+test:prettier:
+  image: node:16
+  stage: test
+  script:
+    - npm install
+    - npm run prettier:check
+  needs: []
+  rules:
+    - changes:
+      - js/**/*
+  
+test:npm-run-build:
+# build runs typecheck internally
+  image: node:16
+  stage: test
+  script:
+    - npm install
+    - npm run build
+  needs: []
+  rules:
+    - changes:
+      - js/**/*
