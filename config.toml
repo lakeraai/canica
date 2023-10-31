@@ -1,0 +1,5 @@
+# This file overrides the default config.toml file that hatch uses to set some defaults.
+# In this case we are only overriding the virtual env directory so that all envs are stored inside of the project.
+
+[dirs.env]
+virtual = "./venv/"

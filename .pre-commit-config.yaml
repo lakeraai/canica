@@ -48,13 +48,6 @@ repos:
         files: js/
         language: system
         pass_filenames: false
-      - id: poetry-lock-files
-        name: poetry.lock files are consistent with pyproject.toml
-        entry: scripts/check_poetry_lock.py
-        stages: [commit]
-        files: "(pyproject.toml|poetry.lock)"
-        language: system
-        pass_filenames: false
       - id: mypy-all
         name: MyPy (all)
         pass_filenames: false
@@ -66,6 +59,7 @@ repos:
         name: pytest
         stages: [push]
         language: system
-        entry: bash -c "pytest"
+        entry: hatch -e test run pytest
         types: [python]
         pass_filenames: false
+        verbose: true

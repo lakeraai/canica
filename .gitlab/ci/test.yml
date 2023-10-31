@@ -2,11 +2,9 @@ test:mypy:
   image: python:3.11
   stage: test
   before_script:
-    - pip install poetry
-    - scripts/try_n_times.sh 2 poetry install --with=dev
+    - pip install hatch
   script:
-    # poetry installs packages into virtualenv that we can use with `poetry run`
-    - poetry run mypy src/
+    - hatch --config config.toml -e dev run mypy src/
   needs: []
   rules:
     - changes:
@@ -16,25 +14,24 @@ test:pytest:
   image: python:3.11
   stage: test
   script:
-    - pip install poetry
-    - scripts/try_n_times.sh 2 poetry install --with=dev
-    - poetry run pytest
+    - pip install hatch
+    - hatch env create test
+    - hatch --config config.toml -e test run pytest
   needs: []
   rules:
     - changes:
-      - src/**/*
+        - src/**/*
 
 test:precommit:
   image: python:3.11
   stage: test
   before_script:
-    - pip install poetry
-    - scripts/try_n_times.sh 2 poetry install --with=dev
+    - pip install hatch
   script:
-    # poetry installs packages into virtualenv that we can use with `poetry run`
-    - poetry run pre-commit install --hook-type pre-commit
-    - SKIP=prettier poetry run pre-commit run --hook-stage commit --all-files
-    - SKIP=npm-run-build poetry run pre-commit run --hook-stage push --all-files
+    - export HATCH_CONFIG="config.toml"
+    - hatch -e dev run pre-commit install --hook-type pre-commit
+    - SKIP=prettier hatch -e dev run pre-commit run --hook-stage
+      commit --all-files
   needs: []
 
 test:prettier:
@@ -46,10 +43,10 @@ test:prettier:
   needs: []
   rules:
     - changes:
-      - js/**/*
-  
+        - js/**/*
+
 test:npm-run-build:
-# build runs typecheck internally
+  # build runs typecheck internally
   image: node:16
   stage: test
   script:
@@ -58,4 +55,4 @@ test:npm-run-build:
   needs: []
   rules:
     - changes:
-      - js/**/*
+        - js/**/*
