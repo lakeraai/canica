@@ -4,54 +4,56 @@ build-backend = "hatchling.build"
 
 [project]
 name = "canica"
-version = "0.0.9"
+version = "0.0.13"
+requires-python = ">=3.9"
 dependencies = [
-    "python>=3.9,<3.13",
     "anywidget>=0.6.5",
     "jupyterlab>=4.0.6",
     "numpy>=1.26.0",
     "pandas>=2.1.1",
     "pyarrow>=13.0.0",
     "pydantic>=2.4.2",
+    "traitlets>=5.13.0",
 ]
 
 [project.optional-dependencies]
-dev = ["watchfiles", "jupyterlab"]
+test = ["pytest>=7.4.2"]
+dev = [
+    "canica[test]",
+    "pre-commit>=3.4.0",
+    "mypy>=1.5.1",
+    "black>=23.9.1",
+    "nbstripout>=0.6.1",
+    "watchfiles>=0.20.0",
+    "pandas-stubs>=2.1.1.230928",
+    "jupyterlab>=4.0.7"
+]
 
-[tool.poetry]
-name = "canica"
-version = "0.0.0"
-description = ""
-authors = ["Lakera AI"]
+[tool.hatch.envs.default]
+python = "3.11"
+type = "virtual"
+skip-install = true
 
-# # automatically add the dev feature to the default env (e.g., hatch shell)
-# [tool.hatch.envs.default]
-# features = ["dev"]
+[tool.hatch.envs.dev]
+template = "default"
+skip-install = false
+features = ["dev"]
 
-[tool.poetry.dependencies]
-python = "^3.9,<3.13"
-anywidget = "^0.6.5"
-jupyterlab = "^4.0.6"
-numpy = "^1.26.0"
-pandas = "^2.1.1"
-pyarrow = "^13.0.0"
-pydantic = "^2.4.2"
+[tool.hatch.envs.test]
+template = "default"
+skip-install = false
+features = ["test"]
 
-[tool.poetry.group.dev.dependencies]
-watchfiles = "^0.20.0"
-pre-commit = "^3.4.0"
-mypy = "^1.5.1"
-pytest = "^7.4.2"
-pandas-stubs = "^2.1.1.230928"
-black = "^23.9.1"
-nbstripout = "^0.6.1"
-
+[[tool.hatch.envs.test.matrix]]
+python = ["3.9", "3.10", "3.11"]
 
 [tool.hatch.build]
+enable-by-default = false
 only-packages = true
 artifacts = ["src/canica/static/*"]
 
 [tool.hatch.build.hooks.jupyter-builder]
+enable-by-default = false
 build-function = "hatch_jupyter_builder.npm_builder"
 ensured-targets = ["src/canica/static/widget.js"]
 skip-if-exists = ["src/canica/static/widget.js"]
