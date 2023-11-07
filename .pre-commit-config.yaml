@@ -52,7 +52,7 @@ repos:
         name: MyPy (all)
         pass_filenames: false
         files: src/
-        entry: mypy src/
+        entry: hatch -e dev run mypy src/
         stages: [push]
         language: system
       - id: pytest

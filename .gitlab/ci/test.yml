@@ -16,6 +16,8 @@ test:pytest:
   script:
     - pip install hatch
     - hatch env create test
+    - hatch -e dev run python scripts/create_if_not_exists.py src/canica/static/widget.js
+    - hatch -e dev run python scripts/create_if_not_exists.py src/canica/static/widget.css
     - hatch --config config.toml -e test run pytest
   needs: []
   rules:
