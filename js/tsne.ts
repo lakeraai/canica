@@ -2,6 +2,8 @@
  * Based on Andrej Karpathy's tsnejs: https://github.com/karpathy/tsnejs/
  */
 
+import Prando from "prando"
+
 import { Algo } from "./algo"
 import { Point } from "./types"
 
@@ -15,15 +17,15 @@ const assert = (condition: boolean, message: string) => {
 // return 0 mean unit standard deviation random number
 let return_v = false
 let v_val = 0.0
-const gaussRandom = (): number => {
+const gaussRandom = (prng: Prando): number => {
   if (return_v) {
     return_v = false
     return v_val
   }
-  const u = 2 * Math.random() - 1
-  const v = 2 * Math.random() - 1
+  const u = 2 * prng.next() - 1
+  const v = 2 * prng.next() - 1
   const r = u * u + v * v
-  if (r == 0 || r > 1) return gaussRandom()
+  if (r == 0 || r > 1) return gaussRandom(prng)
   const c = Math.sqrt((-2 * Math.log(r)) / r)
   v_val = v * c // cache this for next function call for efficiency
   return_v = true
@@ -31,8 +33,8 @@ const gaussRandom = (): number => {
 }
 
 // return random normal number
-const randn = (mu: number, std: number) => {
-  return mu + gaussRandom() * std
+const randn = (mu: number, std: number, prng: Prando) => {
+  return mu + gaussRandom(prng) * std
 }
 
 // utilitity that creates contiguous vector of zeros of size n
@@ -46,6 +48,7 @@ const randn2d = (
   n: number,
   d: number,
   s: number | undefined = undefined,
+  prng: Prando,
 ): number[][] => {
   const x: number[][] = []
   for (let i = 0; i < n; i++) {
@@ -54,7 +57,7 @@ const randn2d = (
       if (typeof s !== "undefined") {
         xhere.push(s)
       } else {
-        xhere.push(randn(0.0, 1e-4))
+        xhere.push(randn(0.0, 1e-4, prng))
       }
     }
     x.push(xhere)
@@ -204,20 +207,25 @@ export class TSNE extends Algo {
     fromIter: number
   } | null = null
 
+  prng: Prando
+
   constructor({
     dim = 2,
     perplexity = 30,
     epsilon = 10,
+    randomSeed = 0,
   }: {
     dim?: number
     perplexity?: number
     epsilon?: number
+    randomSeed?: number
   }) {
     super()
     this.perplexity = perplexity // effective number of nearest neighbors
     this.dim = dim // by default 2-D tSNE
     this.epsilon = epsilon // learning rate
     this.iter = 0
+    this.prng = new Prando(randomSeed)
   }
 
   // this function takes a set of high-dimensional points
@@ -257,9 +265,9 @@ export class TSNE extends Algo {
   // (re)initializes the solution to random
   initSolution() {
     // generate random solution to t-SNE
-    this.Y = randn2d(this.N, 2) as Point[] // the solution
-    this.gains = randn2d(this.N, this.dim, 1.0) // step gains to accelerate progress in unchanging directions
-    this.ystep = randn2d(this.N, this.dim, 0.0) // momentum accumulator
+    this.Y = randn2d(this.N, 2, undefined, this.prng) as Point[] // the solution
+    this.gains = randn2d(this.N, this.dim, 1.0, this.prng) // step gains to accelerate progress in unchanging directions
+    this.ystep = randn2d(this.N, this.dim, 0.0, this.prng) // momentum accumulator
     this.iter = 0
   }
 

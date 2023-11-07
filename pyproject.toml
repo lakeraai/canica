@@ -4,7 +4,7 @@ build-backend = "hatchling.build"
 
 [project]
 name = "canica"
-version = "0.0.13"
+version = "0.0.15"
 requires-python = ">=3.9"
 dependencies = [
     "anywidget>=0.6.5",
@@ -14,6 +14,7 @@ dependencies = [
     "pyarrow>=13.0.0",
     "pydantic>=2.4.2",
     "traitlets>=5.13.0",
+    "importlib-metadata",
 ]
 
 [project.optional-dependencies]
@@ -26,7 +27,7 @@ dev = [
     "nbstripout>=0.6.1",
     "watchfiles>=0.20.0",
     "pandas-stubs>=2.1.1.230928",
-    "jupyterlab>=4.0.7"
+    "jupyterlab>=4.0.7",
 ]
 
 [tool.hatch.envs.default]

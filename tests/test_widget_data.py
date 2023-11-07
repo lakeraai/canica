@@ -16,6 +16,7 @@ def test_no_explicit_text():
             "hue_col": hue_input,
         }
     )
+
     w_data = CanicaTSNE(df, embedding_col="embeddings_col", hue_col="hue_col").data
     assert w_data[0] == Point(text="a", embedding=[1, 2, 3], hue_var="1").model_dump()
     assert w_data[1] == Point(text="b", embedding=[4, 5, 6], hue_var="2").model_dump()

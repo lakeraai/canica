@@ -54,6 +54,7 @@ class CanicaWidget(anywidget.AnyWidget):
             hue_col: Name of the column containing the variable to color by.
                 If None, no coloring is applied.
         """
+
         super().__init__()
 
         assert isinstance(embedding_col, str), "embeddings variable must be a string"
