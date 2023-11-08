@@ -1,6 +1,8 @@
 # canica
 **canica** is an interactive tool to visualize embeddings. Its main current goal is to explore text datasets, representing the input embeddings in a 2D tSNE plot.
 
+![canica gif](./docs/static/replot.gif)
+
 ## How to install
 Just
 ```sh
@@ -23,20 +25,5 @@ You can also use `CanicaUMAP` instead of `CanicaTSNE` to use UMAP.
 
 This will show the canica embedding explorer and will enable interactive exploration of your dataset. Have a look at the [tutorial](./tutorial.ipynb) notebook to see it working.
 
-## Dev instructions
-Start by creating a virtual environment (skip this step if you are already using a virtual environment or you don't want to create one).
-```sh
-conda create -p .venv python=3.11
-conda activate .venv
-pip install poetry
-```
-
-Then install the project.
-```sh
-poetry install
-```
-
-To bundle all the typescript code into one file and keep listening for changes, run:
-```sh
-npm run dev
-```
+## How to contribute
+We welcome contributions of all kinds. For more information on how to do it, we refer you to the [CONTRIBUTING.md](./CONTRIBUTING.md) file.
