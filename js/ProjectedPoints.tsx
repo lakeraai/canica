@@ -29,29 +29,48 @@ const ProjectedPoint = ({
   color?: number
   oldFocusedIndex: Index | null
 }) => {
-  // If currently focused or not focused but we know that it was focused before, we paint it
-  if (tsne.focusedIndex === index || oldFocusedIndex === index) {
-    color = 0xdd8452
+  const RenderHighlighted = () => {
+    // If currently focused or not focused but it was focused before, we draw a circle around it
+    if (tsne.focusedIndex === index || oldFocusedIndex === index) {
+      return (
+        <Graphics
+          draw={(g: GraphicsType) => {
+            g.clear()
+            g.lineStyle(2, color, 1.0)
+            g.drawCircle(0, 0, 8)
+          }}
+          x={point.x}
+          y={point.y}
+          eventMode="dynamic"
+          onmousedown={onmousedown}
+          onmouseenter={onmouseenter}
+        />
+      )
+    }
+    return null
   }
 
   return (
-    <Graphics
-      draw={(g: GraphicsType) => {
-        g.clear()
-        let alpha = 1.0
-        if (tsne.neighborhoodIndices) {
-          alpha = tsne.neighborhoodIndices.has(index) ? 1.0 : 0.2
-        }
-        g.beginFill(color, alpha)
-        g.drawCircle(0, 0, 5)
-        g.endFill()
-      }}
-      x={point.x}
-      y={point.y}
-      eventMode="dynamic"
-      onmousedown={onmousedown}
-      onmouseenter={onmouseenter}
-    />
+    <>
+      <Graphics
+        draw={(g: GraphicsType) => {
+          g.clear()
+          let alpha = 1.0
+          if (tsne.neighborhoodIndices) {
+            alpha = tsne.neighborhoodIndices.has(index) ? 1.0 : 0.2
+          }
+          g.beginFill(color, alpha)
+          g.drawCircle(0, 0, 5)
+          g.endFill()
+        }}
+        x={point.x}
+        y={point.y}
+        eventMode="dynamic"
+        onmousedown={onmousedown}
+        onmouseenter={onmouseenter}
+      />
+      <RenderHighlighted />
+    </>
   )
 }
 
