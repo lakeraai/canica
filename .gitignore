@@ -11,3 +11,4 @@ __pycache__
 src/canica/static
 
 .DS_Store
+.vscode
