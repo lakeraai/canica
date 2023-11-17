@@ -3,6 +3,7 @@ test:mypy:
   stage: test
   before_script:
     - pip install hatch
+    - export HATCH_BUILD_NO_HOOKS=true
   script:
     - hatch --config config.toml -e dev run mypy src/
   needs: []
@@ -13,9 +14,11 @@ test:mypy:
 test:pytest:
   image: python:3.11
   stage: test
-  script:
+  before_script:
     - pip install hatch
+    - export HATCH_BUILD_NO_HOOKS=true
     - hatch env create test
+  script:
     - hatch -e dev run python scripts/create_if_not_exists.py src/canica/static/widget.js
     - hatch -e dev run python scripts/create_if_not_exists.py src/canica/static/widget.css
     - hatch --config config.toml -e test run pytest
@@ -29,8 +32,9 @@ test:precommit:
   stage: test
   before_script:
     - pip install hatch
-  script:
     - export HATCH_CONFIG="config.toml"
+    - export HATCH_BUILD_NO_HOOKS=true
+  script:
     - hatch -e dev run pre-commit install --hook-type pre-commit
     - SKIP=prettier hatch -e dev run pre-commit run --hook-stage
       commit --all-files
