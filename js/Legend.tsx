@@ -29,7 +29,7 @@ export const Legend = ({
           margin: 0 /* Remove margins */,
         }}
       >
-        {Object.entries(colorLegend).map(([key, color]) => (
+        {colorLegend.map(([key, color]) => (
           <li key={key} style={{ fontSize: "1.3em" }}>
             <span
               style={{

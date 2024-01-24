@@ -5,7 +5,7 @@ import { cosine } from "umap-js/dist/umap"
 
 import { Algo } from "./algo"
 import { BottomPanel } from "./BottomPanel"
-import { getCategoricalColorMapping } from "./colors"
+import { ColorMapping } from "./colors"
 import { DataPointSet } from "./data"
 import { Legend } from "./Legend"
 import { ReactViewer } from "./ReactViewer"
@@ -26,9 +26,13 @@ export const renderWidget = ({
   const stage = useRef<Stage>(null)
   const [neighbourFrac, setNeighbourFrac] = useState<number>(0)
   const [algo, setAlgo] = useState<Algo | null>(null)
+
+  // Get the color mapping that will be fixed throughout the whole process. We don't want to change the var -> color assignment.
+  const colorMapping = new ColorMapping(dataPointSet.dataPoints.map((d) => d.hue_var))
+
   // We update this dataset with the currently investigated points, so we can select new points and repeat the process endlessly
   const [partialDataPointSet, setPartialDataPointSet] = useState<DataPointSet>(
-    new DataPointSet(dataPointSet.dataPoints),
+    new DataPointSet(dataPointSet.dataPoints, colorMapping),
   )
   // Point that was focused before a change (e.g. reset) is stored and used to highlight the same point again
   const [oldFocusedId, setOldFocusedId] = useState<DataPointId | null>(null)
@@ -48,13 +52,14 @@ export const renderWidget = ({
 
   const resetDataPointSet = () =>
     // Start from scratch again (dataPointSet is the original dataset)
-    setNewDatapointSet(new DataPointSet(dataPointSet.dataPoints))
+    setNewDatapointSet(new DataPointSet(dataPointSet.dataPoints, colorMapping))
 
   const getNewDataPoints = (dataPointSet: DataPointSet, algo: Algo | null) => {
     if (algo === null) return dataPointSet
     if (algo.neighborhoodIndices === null) return dataPointSet
     return new DataPointSet(
       Array.from(algo.neighborhoodIndices).map((i) => dataPointSet.dataPoints[i]),
+      colorMapping,
     )
   }
 
@@ -126,12 +131,7 @@ export const renderWidget = ({
 
       {/* Legend panel to the right */}
       <div style={{ flex: 1 }}>
-        <Legend
-          colorLegend={getCategoricalColorMapping(
-            dataPointSet.dataPoints.map((d) => d.hue_var),
-          )}
-          hueVarName={hueVarName}
-        />
+        <Legend colorLegend={colorMapping?.getLegend()} hueVarName={hueVarName} />
       </div>
     </div>
   )

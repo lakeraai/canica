@@ -90,7 +90,84 @@ export class Color {
   }
 }
 
-export type ColorLegend = { [key: string]: Color }
+export type ColorLegend = [string | number, Color][]
+
+export class ColorMapping {
+  categorical: boolean
+  valueToColorCategorical: { [key: string | number]: Color } | null = null
+  valueToColorNumerical: ((value: number) => Color) | null = null
+
+  constructor(variable: any[]) {
+    this.categorical = useCategorical(variable)
+    if (this.categorical) {
+      this.valueToColorCategorical = this.getCategoricalColorMapping(variable)
+    } else {
+      this.valueToColorNumerical = this.getNumericalColorMapping(variable)
+    }
+  }
+  getCategoricalColorMapping = (variable: any[]): { [key: string]: Color } | null => {
+    // Get unique values
+    const uniqueValues = [...new Set(variable)]
+    const cmap = CATEGORICAL_MAPS.D3
+    if (uniqueValues.length > cmap.length) {
+      return null
+    }
+
+    const valueToColor: { [key: string]: Color } = {}
+    uniqueValues.forEach((value, index) => {
+      valueToColor[value] = cmap[index]
+    })
+    return valueToColor
+  }
+
+  getNumericalColorMapping = (variable: number[]): ((value: number) => Color) => {
+    const min = Math.min(...variable)
+    const max = Math.max(...variable)
+    const cmap = COLOR_SCALES.Viridis
+    return (value: number) => {
+      // Rescale so all values are between 0 and 1
+      const scaled_value = (value - min) / (max - min + 1e-9)
+      // Get the color
+      return interpolate(cmap, scaled_value)
+    }
+  }
+
+  getColor = (value: string | number | null): Color => {
+    if (this.categorical) {
+      if (this.valueToColorCategorical === null) {
+        throw new Error("Categorical colormap not initialized")
+      }
+      if (value === null) {
+        return CATEGORICAL_MAPS.D3[0]
+      }
+      return this.valueToColorCategorical[value]
+    }
+    if (this.valueToColorNumerical === null) {
+      throw new Error("Numerical colormap not initialized")
+    }
+    if (typeof value !== "number") {
+      throw new Error("Numerical value expected")
+    }
+    return this.valueToColorNumerical(value)
+  }
+
+  getColors = (value: (string | number | null)[]): Color[] => {
+    return value.map((val) => this.getColor(val))
+  }
+
+  getLegend = (): ColorLegend | null => {
+    if (this.categorical) {
+      if (this.valueToColorCategorical === null) {
+        throw new Error("Categorical colormap not initialized")
+      }
+      return Object.entries(this.valueToColorCategorical).map(([key, color]) => [
+        key,
+        color,
+      ])
+    }
+    return null
+  }
+}
 
 type ColorScale = [number, Color][]
 
@@ -200,48 +277,4 @@ const useCategorical = (variable: number[] | string[] | undefined[]): boolean =>
   } else {
     throw new Error("Number or string array expected for hue variable")
   }
-}
-
-const assignColorNumerical = (variable: number[]): Color[] => {
-  const min = Math.min(...variable)
-  const max = Math.max(...variable)
-  const cmap = COLOR_SCALES.Viridis
-  return variable.map((value) => {
-    // Rescale so all values are between 0 and 1
-    const scaled_value = (value - min) / (max - min + 1e-9)
-    // Get the color
-    return interpolate(cmap, scaled_value)
-  })
-}
-
-export const getCategoricalColorMapping = (variable: any[]): ColorLegend | null => {
-  // Get unique values
-  const uniqueValues = [...new Set(variable)]
-  const cmap = CATEGORICAL_MAPS.D3
-  if (uniqueValues.length > cmap.length) {
-    return null
-  }
-
-  const valueToColor: { [key: string]: Color } = {}
-  uniqueValues.forEach((value, index) => {
-    valueToColor[value] = cmap[index]
-  })
-  return valueToColor
-}
-
-const assignColorCategorical = (variable: any[]): Color[] => {
-  const valueToColor = getCategoricalColorMapping(variable)
-  if (valueToColor === null) {
-    throw new Error(
-      "Value to color mapping could not be generated. Too many unique values.",
-    )
-  }
-  return variable.map((value) => valueToColor[value])
-}
-
-export const getColors = (variable: any[]): Color[] => {
-  if (useCategorical(variable)) {
-    return assignColorCategorical(variable)
-  }
-  return assignColorNumerical(variable)
 }
