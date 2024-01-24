@@ -5,7 +5,9 @@ import { cosine } from "umap-js/dist/umap"
 
 import { Algo } from "./algo"
 import { BottomPanel } from "./BottomPanel"
+import { getCategoricalColorMapping } from "./colors"
 import { DataPointSet } from "./data"
+import { Legend } from "./Legend"
 import { ReactViewer } from "./ReactViewer"
 import { TSNE } from "./tsne"
 import { DataPointId } from "./types"
@@ -13,11 +15,11 @@ import { UMAP } from "./umap"
 
 export const renderWidget = ({
   dataPointSet,
-  hueVarName = null,
+  hueVarName = undefined,
   algoName = "UMAP",
 }: {
   dataPointSet: DataPointSet
-  hueVarName?: string | null
+  hueVarName?: string
   algoName?: string
 }) => {
   const [hoveredId, setHoveredId] = useState<DataPointId | null>(null)
@@ -84,36 +86,53 @@ export const renderWidget = ({
   }, [partialDataPointSet.dataPoints, algo])
 
   return (
-    <>
-      <Stage
-        options={{ backgroundColor: 0xf9f9fa }}
-        ref={stage}
-        // Setting width and height to 0.67 of the screen size.
-        // Adding a max size because of misleading window sizes in VSCode
-        width={Math.min(0.67 * window.innerWidth, 1280)} // 1280 ~= 1920 * 0.67
-        height={Math.min(0.67 * window.innerHeight, 720)} // 720 ~= 1080 * 0.67
+    <div style={{ display: "flex" }}>
+      <div
+        style={{
+          marginRight: "10px",
+          width: Math.min(0.67 * window.innerWidth, 1280), // 1280 ~= 1920 * 0.67. Width of the div should be the same as the Stage.
+        }}
       >
-        <ReactViewer
-          dataPointSet={partialDataPointSet}
-          setHoveredId={setHoveredId}
-          // vv: I think this ref can't be null since we're inside the <Stage> tag
-          stage={stage as React.MutableRefObject<Stage>}
-          algo={algo}
-          neighbourFrac={neighbourFrac}
-          oldFocusedId={oldFocusedId}
-          setOldFocusedId={setOldFocusedId}
-        />
-      </Stage>
+        <Stage
+          options={{ backgroundColor: 0xf9f9fa }}
+          ref={stage}
+          // Setting width and height to 0.67 of the screen size.
+          // Adding a max size because of misleading window sizes in VSCode
+          width={Math.min(0.67 * window.innerWidth, 1280)}
+          height={Math.min(0.67 * window.innerHeight, 720)} // 720 ~= 1080 * 0.67
+        >
+          <ReactViewer
+            dataPointSet={partialDataPointSet}
+            setHoveredId={setHoveredId}
+            // vv: I think this ref can't be null since we're inside the <Stage> tag
+            stage={stage as React.MutableRefObject<Stage>}
+            algo={algo}
+            neighbourFrac={neighbourFrac}
+            oldFocusedId={oldFocusedId}
+            setOldFocusedId={setOldFocusedId}
+          />
+        </Stage>
 
-      <BottomPanel
-        neighbourFrac={neighbourFrac}
-        setNeighbourFrac={setNeighbourFrac}
-        dataPointSet={partialDataPointSet}
-        updateDataPointSet={updateDataPointSet}
-        resetDataPointSet={resetDataPointSet}
-        hoveredId={hoveredId}
-        hueVarName={hueVarName}
-      />
-    </>
+        <BottomPanel
+          neighbourFrac={neighbourFrac}
+          setNeighbourFrac={setNeighbourFrac}
+          dataPointSet={partialDataPointSet}
+          updateDataPointSet={updateDataPointSet}
+          resetDataPointSet={resetDataPointSet}
+          hoveredId={hoveredId}
+          hueVarName={hueVarName}
+        />
+      </div>
+
+      {/* Legend panel to the right */}
+      <div style={{ flex: 1 }}>
+        <Legend
+          colorLegend={getCategoricalColorMapping(
+            dataPointSet.dataPoints.map((d) => d.hue_var),
+          )}
+          hueVarName={hueVarName}
+        />
+      </div>
+    </div>
   )
 }

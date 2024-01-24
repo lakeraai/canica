@@ -84,11 +84,19 @@ export class Color {
   toHex(): number {
     return (this.r << 16) + (this.g << 8) + this.b
   }
+
+  toHexStr(): string {
+    return "#" + this.toHex().toString(16).padStart(6, "0")
+  }
 }
+
+export type ColorLegend = { [key: string]: Color }
 
 type ColorScale = [number, Color][]
 
 // This is a map of numerical colormaps
+// Viridis is a commonly used colormap. I got the values from:
+// https://github.com/plotly/plotly.py/blob/master/packages/python/plotly/_plotly_utils/colors/sequential.py
 const COLOR_SCALES: { [key: string]: ColorScale } = {
   Viridis: [
     [0, new Color(0x440154)],
@@ -112,6 +120,8 @@ const COLOR_SCALES: { [key: string]: ColorScale } = {
 }
 
 // This is a list of categorical colormaps
+// I assume it's the default for D3, but I got them from here:
+// https://github.com/plotly/plotly.py/blob/master/packages/python/plotly/_plotly_utils/colors/qualitative.py
 const CATEGORICAL_MAPS = {
   D3: [
     new Color(0x1f77b4),
@@ -204,18 +214,28 @@ const assignColorNumerical = (variable: number[]): Color[] => {
   })
 }
 
-const assignColorCategorical = (variable: any[]): Color[] => {
+export const getCategoricalColorMapping = (variable: any[]): ColorLegend | null => {
   // Get unique values
   const uniqueValues = [...new Set(variable)]
   const cmap = CATEGORICAL_MAPS.D3
   if (uniqueValues.length > cmap.length) {
-    throw new Error("Too many unique values for categorical colormap")
+    return null
   }
 
   const valueToColor: { [key: string]: Color } = {}
   uniqueValues.forEach((value, index) => {
     valueToColor[value] = cmap[index]
   })
+  return valueToColor
+}
+
+const assignColorCategorical = (variable: any[]): Color[] => {
+  const valueToColor = getCategoricalColorMapping(variable)
+  if (valueToColor === null) {
+    throw new Error(
+      "Value to color mapping could not be generated. Too many unique values.",
+    )
+  }
   return variable.map((value) => valueToColor[value])
 }
 

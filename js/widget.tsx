@@ -9,7 +9,7 @@ import { renderWidget } from "./WidgetTools"
 export const render = createRender(() => {
   // Data coming from the backend.
   const [data] = useModelState<InputData>("data")
-  const [hueVarName] = useModelState<string | null>("hue_col_name")
+  const [hueVarName] = useModelState<string | undefined>("hue_col_name")
   const [algoName] = useModelState<string>("algo_name")
 
   // Build necessary data structures
