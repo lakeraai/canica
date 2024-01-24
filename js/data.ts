@@ -1,11 +1,11 @@
-import { Color, getColors } from "./colors"
+import { Color, ColorMapping } from "./colors"
 import { DataPoint, DataPointId, Index, InputData } from "./types"
 
 export class DataPointSet {
   dataPoints: DataPoint[]
   idToIndex: { [key: DataPointId]: Index }
 
-  constructor(data: DataPoint[]) {
+  constructor(data: DataPoint[], colorMapping: ColorMapping) {
     this.dataPoints = data
     this.idToIndex = {}
     this.dataPoints.forEach((dataPoint, index) => {
@@ -14,7 +14,7 @@ export class DataPointSet {
 
     // If hue_var is null, only one distinct categorical value is present,
     // so one same color is assigned to all points
-    const colors: Color[] = getColors(
+    const colors: Color[] = colorMapping.getColors(
       this.dataPoints.map((dataPoint) => dataPoint.hue_var),
     )
     this.dataPoints.forEach((dataPoint, index) => {
@@ -39,5 +39,8 @@ export const getDataPointSet = (data: InputData): DataPointSet => {
       text: data[key].text,
     }
   })
-  return new DataPointSet(rawDataPoints)
+  return new DataPointSet(
+    rawDataPoints,
+    new ColorMapping(rawDataPoints.map((d) => d.hue_var)),
+  )
 }
