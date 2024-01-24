@@ -12,7 +12,7 @@ const HoverPanel = ({
 }: {
   dataPointSet: DataPointSet
   hoveredId: DataPointId | null
-  hueVarName: string | null
+  hueVarName: string | undefined
 }) => {
   if (hoveredId === null) {
     return <div>Hover over a point to see its text</div>
@@ -99,7 +99,7 @@ export const BottomPanel = ({
   updateDataPointSet: () => void
   resetDataPointSet: () => void
   hoveredId: DataPointId | null
-  hueVarName: string | null
+  hueVarName: string | undefined
 }) => {
   return (
     <>
